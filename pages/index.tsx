@@ -78,7 +78,7 @@ const Home: NextPage = () => {
           <form className="pt-8 px-4 sm:px-10" onSubmit={onSearch}>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-700"
             >
               Search Connections
             </label>
@@ -87,13 +87,15 @@ const Home: NextPage = () => {
                 type="text"
                 name="name"
                 id="name"
-                className="shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full pr-12 sm:text-sm border-gray-300 rounded-md"
+                className="shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full pr-12 sm:text-sm border-slate-300 rounded-md"
                 autoFocus
               />
               <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-                <kbd className="inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400">
-                  ⌘K
-                </kbd>
+                <button type="submit">
+                  <kbd className="inline-flex items-center border border-slate-200 rounded px-2 text-sm font-sans font-medium text-slate-400 transition hover:bg-slate-100">
+                    Enter
+                  </kbd>
+                </button>
               </div>
             </div>
           </form>
@@ -106,7 +108,7 @@ const Home: NextPage = () => {
                   <span>{searchedProfile?.email}</span>
                 </div>
               )}
-              <ul role="list" className="mt-3 divide-y divide-gray-200">
+              <ul role="list" className="mt-3 divide-y divide-slate-200">
                 {results.map((result, index) =>
                   index < resultsIndex ? (
                     <ConnectionItem key={result.email} {...result} />
@@ -116,7 +118,7 @@ const Home: NextPage = () => {
               {results.length > resultsIndex + 3 && (
                 <div className="mt-5 text-center">
                   <button
-                    className="text-sm px-4 py-2 border rounded"
+                    className="text-sm px-4 py-2 border rounded transition hover:bg-slate-100"
                     type="button"
                     onClick={() => setResultsIndex(resultsIndex + 3)}
                   >

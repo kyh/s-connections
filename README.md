@@ -1,34 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<img src="https://github.com/kyh/interview-sequoia/blob/main/docs/snapshot.png?raw=true" height="500" />
 
-## Getting Started
+## Solution
 
-First, run the development server:
+There were 3 categories of decisions made in order to implement the take-home assignment:
 
-```bash
-npm run dev
-# or
-yarn dev
+- App architecture
+- Data structure
+- UI Design
+
+#### App architecture
+
+The web framework of choice is [`Next.js`](https://nextjs.org/) since it offers a fullstack React experience. I leveraged the existing Firestore database that was set up for this assignment for my backend, though it turned out to be more difficult than I expected in order to stitch the data on the frontend.
+
+#### Data structure
+
+Each of the 3 tables touched by the app has it's own set of modules in the `lib` directory in order to interact with the data. I centered around creating [multiple maps](https://github.com/kyh/interview-sequoia/blob/main/lib/interactions.ts#L13-L19) with a users "email" as the key since it can be used as a constant relationship between the models.
+
+#### UI Design
+
+Based the UI off the Mac Spotlight feature since the requirements follow a similar concept. I leveraged Tailwind CSS for the styling since it provides great looking defaults and working inline styles speeds up the development process.
+
+### Improvements
+
+Ideally, with more time there are a few things I would like to improve:
+
+- Instead of querying Firestore directly, I would create a Next.js API handler and do the data stitching on the backend. This is helpful for two reasons:
+  1. Less client code needs to be bundled and served improving initial load performance and
+  2. we can optimize caching results for all client requests rather than a local client cache
+- I may consider setting up a materialized view for the data the page view would be just a simple request rather than a series of cascading queries
+- Add more relations to the Firestore database
+- Frontend UI improvements like autocomplete, more interactions with the list, etc.
+
+### Timeline
+
+- Setting up 10 mins
+- Implementing profile search: 30 mins
+- Implementing interactions search: 30 mins
+- Implementing history search: 30 mins
+- Calculating scores: 1.5 hours
+- Stitching data: 1 hour
+- UI: 1 hour
+- Docs, bit of cleanup, deployment: 30 mins
+
+Total Time: ~6 hours
+
+### File structure
+
+```
+├── /lib                     # Feature source code (most of the logic lives here)
+├── /components              # Reusable shared components
+└── /pages                   # Next.js Routing
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+#### Prerequisites
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+- [Node.js](https://nodejs.org/en/) - LTS version recommended
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+#### Installation and Running
 
-## Learn More
+```sh
+npm i
 
-To learn more about Next.js, take a look at the following resources:
+# Local development
+npm run dev
+# This command starts a local development instance of the server accessible at:
+# http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Framework - [Next.js](https://nextjs.org/)
+- Styling - [Tailwind](https://tailwindcss.com)
+- Database - [Firestore](https://firebase.google.com/docs/firestore)
