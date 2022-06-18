@@ -42,7 +42,8 @@ export const getInteractions = async (email: string) => {
     data.to.forEach((to: string) => {
       interactions.push({
         email: to,
-        timestamp: Number(data.timestamp),
+        // Timestamp is in seconds, but we want milliseconds
+        timestamp: Number(data.timestamp) * 1000,
       });
     });
     return interactions;
@@ -52,7 +53,7 @@ export const getInteractions = async (email: string) => {
     const data = d.data();
     return {
       email: data.from,
-      timestamp: Number(data.timestamp),
+      timestamp: Number(data.timestamp) * 1000,
     } as Interaction;
   });
 
@@ -80,6 +81,7 @@ const createInteractionMap = (interactions: Interaction[]) => {
         score: 0,
       };
     }
+
     const lastYear = withinLastYear(timestamp);
 
     map[email].totalInteractionsCount++;
