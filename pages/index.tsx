@@ -6,6 +6,7 @@ import { useState } from "react";
 import { getProfile } from "lib/profile";
 import { getInteractions } from "lib/interactions";
 import { getHistory } from "lib/history";
+import { capitalizeFirstLetter } from "lib/utils";
 import { ConnectionItem } from "components/ConnectionItem";
 
 type Connection = {
@@ -30,7 +31,9 @@ const Home: NextPage = () => {
     setResults([]);
     setLoading(true);
 
-    const profile = await getProfile(name);
+    // It's difficult to search using Firebase, need to find a way better
+    // string match
+    const profile = await getProfile(capitalizeFirstLetter(name));
 
     if (profile) {
       setSearchedProfile(profile);
@@ -98,7 +101,7 @@ const Home: NextPage = () => {
           {results ? (
             <>
               {searchedProfile && !loading && (
-                <div className="flex justify-between mt-5 py-2 px-4 text-sm text-slate-600 bg-slate-100 sm:px-6">
+                <div className="sticky top-0 flex justify-between mt-5 py-2 px-4 text-sm text-slate-600 bg-slate-100 sm:px-6">
                   <span>Found {searchedProfile?.name}</span>
                   <span>{searchedProfile?.email}</span>
                 </div>

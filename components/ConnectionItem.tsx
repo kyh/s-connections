@@ -49,6 +49,11 @@ export const ConnectionItem = ({
                   />
                   <span className="truncate">{profile.email}</span>
                 </p>
+                {companies && companies.length > 0 && (
+                  <span className="mt-2 inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    Worked Together
+                  </span>
+                )}
               </>
             ) : (
               <>
@@ -57,13 +62,25 @@ export const ConnectionItem = ({
               </>
             )}
           </div>
-          <div className="text-right  text-sm">
+          <div className="text-right text-sm">
             <p className="text-gray-900">
-              {totalInteractionsCount} total interactions
+              Exchanged {totalInteractionsCount} emails
             </p>
             <p className="mt-2 text-gray-500">
               {withinYearInteractionsCount} in last year
             </p>
+            {(companies || []).map((company) => {
+              const start = company.start.toISOString().split("T")[0];
+              const end = company.end
+                ? company.end.toISOString().split("T")[0]
+                : "Present";
+              return (
+                <p key={company.name} className="mt-2 text-gray-500">
+                  At <span className="text-gray-900">{company.name}</span>{" "}
+                  between {start} and {end}
+                </p>
+              );
+            })}
           </div>
         </div>
       </div>
