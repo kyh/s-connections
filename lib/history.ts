@@ -32,7 +32,7 @@ export type HistoryMap = {
 const cache: Cache = {};
 
 export const getHistory = async (email: string) => {
-  console.log("Searching history for ", email);
+  console.log("Searching history for", email);
   if (cache[email]) return cache[email];
 
   const historyCollection = collection(db, "histories");
@@ -43,7 +43,7 @@ export const getHistory = async (email: string) => {
 
   const historyMap: HistoryMap = {};
   // Search for other people who worked at these companies between the dates
-  historySnapshot.forEach(async (historyDoc) => {
+  for (const historyDoc of historySnapshot.docs) {
     const historyData = historyDoc.data();
 
     const history: History = {
@@ -112,7 +112,7 @@ export const getHistory = async (email: string) => {
 
         historyMap[d.email].score += score;
       });
-  });
+  }
 
   cache[email] = historyMap;
 

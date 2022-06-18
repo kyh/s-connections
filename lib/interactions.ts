@@ -22,7 +22,7 @@ const cache: Cache = {};
 
 export const getInteractions = async (email: string) => {
   if (cache[email]) return cache[email];
-  console.log("Searching interactions for ", email);
+  console.log("Searching interactions for", email);
   const fromQuery = query(
     collection(db, "interactions"),
     where("from", "==", email)

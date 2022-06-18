@@ -1,59 +1,130 @@
 import type { NextPage } from "next";
-import { searchProfile } from "lib/profile";
-import { searchInteractions } from "lib/interactions";
+import type { Profile } from "lib/profile";
+import type { InteractionsMap } from "lib/interactions";
+import type { HistoryMap } from "lib/history";
+import { useState } from "react";
+import { getProfile } from "lib/profile";
+import { getInteractions } from "lib/interactions";
+import { getHistory } from "lib/history";
+import { ConnectionItem } from "components/ConnectionItem";
+
+type Connection = {
+  name: string;
+  email: string;
+  score: number;
+} & HistoryMap["email"] &
+  InteractionsMap["email"];
 
 const Home: NextPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<Connection[] | null>([]);
+  const [searchedProfile, setSearchedProfile] = useState<Profile | null>(null);
+  const [resultsIndex, setResultsIndex] = useState(3);
+
   const onSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = new FormData(e.target as HTMLFormElement);
     const name = data.get("name") as string;
 
-    const profile = await searchProfile(name);
-    console.log("Found:", profile);
+    setResultsIndex(3);
+    setResults([]);
+    setLoading(true);
+
+    const profile = await getProfile(name);
 
     if (profile) {
-      // searchHistory(profile.name);
-      searchInteractions(profile.email);
+      setSearchedProfile(profile);
+
+      const [interactionsMap, historyMap] = await Promise.all([
+        getInteractions(profile.email),
+        getHistory(profile.email),
+      ]);
+
+      const merged = [
+        ...Object.keys(interactionsMap),
+        ...Object.keys(historyMap),
+      ].reduce((acc, email) => {
+        const history = historyMap[email];
+        const interactions = interactionsMap[email];
+        acc[email] = {
+          ...interactions,
+          ...history,
+          score:
+            (history ? history.score : 0) +
+            (interactions ? interactions.score : 0),
+        };
+
+        return acc;
+      }, {} as Record<string, Connection>);
+
+      const sorted = Object.entries(merged)
+        .map(([email, connection]) => ({ ...connection, email }))
+        .sort((a, b) => b.score - a.score);
+
+      setResults(sorted);
+    } else {
+      setResults(null);
     }
+    setLoading(false);
   };
 
   return (
-    <main className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Direct Connections
-        </h2>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={onSearch}>
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Name
-              </label>
-              <div className="mt-1">
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
-                />
+    <main className="min-h-screen py-12 sm:px-6 lg:px-8 bg-slate-400">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
+        <div className="bg-white shadow-lg sm:rounded-lg pb-8">
+          <form className="pt-8 px-4 sm:px-10" onSubmit={onSearch}>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Search Connections
+            </label>
+            <div className="mt-1 relative flex items-center">
+              <input
+                type="text"
+                name="name"
+                id="name"
+                className="shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full pr-12 sm:text-sm border-gray-300 rounded-md"
+                autoFocus
+              />
+              <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
+                <kbd className="inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400">
+                  ⌘K
+                </kbd>
               </div>
             </div>
-
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-            >
-              Search
-            </button>
           </form>
+          {loading && <div className="mt-5 text-center">Loading...</div>}
+          {results ? (
+            <>
+              {searchedProfile && !loading && (
+                <div className="flex justify-between mt-5 py-2 px-4 text-sm text-slate-600 bg-slate-100 sm:px-6">
+                  <span>Found {searchedProfile?.name}</span>
+                  <span>{searchedProfile?.email}</span>
+                </div>
+              )}
+              <ul role="list" className="mt-3 divide-y divide-gray-200">
+                {results.map((result, index) =>
+                  index < resultsIndex ? (
+                    <ConnectionItem key={result.email} {...result} />
+                  ) : null
+                )}
+              </ul>
+              {results.length > resultsIndex + 3 && (
+                <div className="mt-5 text-center">
+                  <button
+                    className="text-sm px-4 py-2 border rounded"
+                    type="button"
+                    onClick={() => setResultsIndex(resultsIndex + 3)}
+                  >
+                    Show more
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-5 text-center">No results</div>
+          )}
         </div>
       </div>
     </main>
