@@ -1,17 +1,8 @@
-import type { InteractionsMap } from "lib/interactions";
-import type { HistoryMap } from "lib/history";
+import type { Connection } from "lib/useConnections";
 import type { Profile } from "lib/profile";
 
 import { useEffect, useState } from "react";
-import { MailIcon } from "@heroicons/react/solid";
 import { getProfile } from "lib/profile";
-
-type Connection = {
-  name: string;
-  email: string;
-  score: number;
-} & HistoryMap["email"] &
-  InteractionsMap["email"];
 
 export const ConnectionItem = ({
   name,
@@ -42,15 +33,11 @@ export const ConnectionItem = ({
                 <p className="text-sm font-medium text-emerald-600 truncate">
                   {profile.name}
                 </p>
-                <p className="mt-2 flex items-center text-sm text-gray-500">
-                  <MailIcon
-                    className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
+                <p className="mt-1 flex items-center text-sm text-slate-500">
                   <span className="truncate">{profile.email}</span>
                 </p>
                 {companies && companies.length > 0 && (
-                  <span className="mt-2 inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                  <span className="mt-3 inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                     Worked Together
                   </span>
                 )}
@@ -58,16 +45,16 @@ export const ConnectionItem = ({
             ) : (
               <>
                 <p className="animate-pulse bg-slate-200 h-4 w-full rounded" />
-                <p className="animate-pulse bg-slate-200 h-4 w-full mt-2 rounded" />
+                <p className="animate-pulse bg-slate-200 h-4 w-full mt-1 rounded" />
               </>
             )}
           </div>
           <div className="text-right text-sm">
-            <p className="text-gray-900">
-              Exchanged {totalInteractionsCount} emails
+            <p className="text-slate-900">
+              Exchanged {totalInteractionsCount || 0} emails
             </p>
-            <p className="mt-2 text-gray-500">
-              {withinYearInteractionsCount} in last year
+            <p className="mt-1 text-slate-500">
+              {withinYearInteractionsCount || 0} in last year
             </p>
             {(companies || []).map((company) => {
               const start = company.start.toISOString().split("T")[0];
@@ -75,8 +62,8 @@ export const ConnectionItem = ({
                 ? company.end.toISOString().split("T")[0]
                 : "Present";
               return (
-                <p key={company.name} className="mt-2 text-gray-500">
-                  At <span className="text-gray-900">{company.name}</span>{" "}
+                <p key={company.name} className="mt-1 text-slate-500">
+                  At <span className="text-slate-900">{company.name}</span>{" "}
                   between {start} and {end}
                 </p>
               );

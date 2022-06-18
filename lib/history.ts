@@ -46,7 +46,7 @@ export const getHistory = async (email: string) => {
   for (const historyDoc of historySnapshot.docs) {
     const historyData = historyDoc.data();
 
-    const history: History = {
+    const userHistory: History = {
       name: historyData.name,
       email: historyData.email,
       company: historyData.company,
@@ -58,9 +58,9 @@ export const getHistory = async (email: string) => {
     // in Firestore to query between two dates
     const companyQuery = query(
       historyCollection,
-      where("company", "==", history.company)
-      // where("startDate", ">", history.startDate)
-      // where("endDate", "<", history.endDate)
+      where("company", "==", userHistory.company)
+      // where("startDate", ">", userHistory.startDate)
+      // where("endDate", "<", userHistory.endDate)
     );
     const companySnapshot = await getDocs(companyQuery);
 
@@ -69,9 +69,7 @@ export const getHistory = async (email: string) => {
       .map((d) => {
         const data = d.data();
         return {
-          name: data.name,
-          email: data.email,
-          company: data.company,
+          ...data,
           start: new Date(data.start_date),
           end: new Date(data.end_date),
         } as History;
@@ -79,17 +77,18 @@ export const getHistory = async (email: string) => {
       // We can remove this if we backfill the db to use Date objects instead.
       .filter((d) => {
         if (
-          d.name !== history.name &&
-          history.start <= d.end &&
-          d.start <= history.end
+          d.name !== userHistory.name &&
+          userHistory.start <= d.end &&
+          d.start <= userHistory.end
         )
           return true;
         return false;
       })
       // Create the history map
       .forEach((d) => {
-        const overlapStart = history.start < d.start ? d.start : history.start;
-        const overlapEnd = history.end < d.end ? history.end : d.end;
+        const overlapStart =
+          userHistory.start < d.start ? d.start : userHistory.start;
+        const overlapEnd = userHistory.end < d.end ? userHistory.end : d.end;
 
         if (!historyMap[d.email]) {
           historyMap[d.email] = {

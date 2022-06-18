@@ -31,6 +31,8 @@ export const getProfile = async (
     collection(db, "profiles"),
     orderBy(by),
     limit(1),
+    // It's quite difficult to string search with Firestore.
+    // Might be a better API than what I'm doing here.
     where(by, ">=", value)
   );
 

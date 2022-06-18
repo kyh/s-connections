@@ -2,6 +2,8 @@
 
 ## Solution
 
+> https://ssearch.vercel.app/
+
 There were 3 categories of decisions made in order to implement the take-home assignment:
 
 - App architecture
@@ -10,15 +12,15 @@ There were 3 categories of decisions made in order to implement the take-home as
 
 #### App architecture
 
-The web framework of choice is [`Next.js`](https://nextjs.org/) since it offers a fullstack React experience. I leveraged the existing Firestore database that was set up for this assignment for my backend, though it turned out to be more difficult than I expected in order to stitch the data on the frontend.
+The web framework of choice is [`Next.js`](https://nextjs.org/) since it offers a fullstack React experience. I leveraged the existing Firestore database that was set up for this assignment for my backend, though it turned out to be more difficult than I expected in order to stitch the data on the frontend. I may have done things slightly differently given this experience and more time, more on that below.
 
 #### Data structure
 
-Each of the 3 tables touched by the app has it's own set of modules in the `lib` directory in order to interact with the data. I centered around creating [multiple maps](https://github.com/kyh/interview-sequoia/blob/main/lib/interactions.ts#L13-L19) with a users "email" as the key since it can be used as a constant relationship between the models.
+Each of the 3 tables touched by the app has it's own set of modules in the `lib` directory in order to interact with the data. I centered around creating [a mapping](https://github.com/kyh/interview-sequoia/blob/main/lib/interactions.ts#L13-L19) from the users `email` to their calculated data values to act as a cache and the join key between models.
 
 #### UI Design
 
-Based the UI off the Mac Spotlight feature since the requirements follow a similar concept. I leveraged Tailwind CSS for the styling since it provides great looking defaults and working inline styles speeds up the development process.
+Based the UI off the Mac Spotlight feature since the requirements follow a similar concept. I leveraged Tailwind CSS for the styling since it provides great looking defaults and working with the inline style process speeds up the development process. I would break these up into smaller components to make it more maintainable.
 
 ### Improvements
 
@@ -27,9 +29,9 @@ Ideally, with more time there are a few things I would like to improve:
 - Instead of querying Firestore directly, I would create a Next.js API handler and do the data stitching on the backend. This is helpful for two reasons:
   1. Less client code needs to be bundled and served improving initial load performance and
   2. we can optimize caching results for all client requests rather than a local client cache
-- I may consider setting up a materialized view for the data the page view would be just a simple request rather than a series of cascading queries
-- Add more relations to the Firestore database
-- Frontend UI improvements like autocomplete, more interactions with the list, etc.
+- I may consider setting up a materialized view for the data. Searching would then be just a simple request rather than a series of cascading queries
+- Add better relationship keys directly in the Firestore database. Leverage [cloud functions](https://firebase.google.com/docs/firestore/extend-with-functions) to pre-compute these values
+- Frontend UI improvements like autocomplete, more interactions with the list, break up UI into smaller components.
 
 ### Timeline
 
@@ -37,8 +39,7 @@ Ideally, with more time there are a few things I would like to improve:
 - Implementing profile search: 30 mins
 - Implementing interactions search: 30 mins
 - Implementing history search: 30 mins
-- Calculating scores: 1.5 hours
-- Stitching data: 1 hour
+- Calculating scores and stitching data: 2 hours
 - UI: 1 hour
 - Docs, bit of cleanup, deployment: 30 mins
 

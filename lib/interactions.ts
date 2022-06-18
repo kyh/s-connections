@@ -3,7 +3,7 @@ import { db } from "lib/db";
 
 type Interaction = {
   email: string;
-  timestamp: number;
+  date: Date;
 };
 
 type Cache = {
@@ -23,15 +23,20 @@ const cache: Cache = {};
 export const getInteractions = async (email: string) => {
   if (cache[email]) return cache[email];
   console.log("Searching interactions for", email);
+
   const fromQuery = query(
     collection(db, "interactions"),
     where("from", "==", email)
   );
+
   const toQuery = query(
     collection(db, "interactions"),
     where("to", "array-contains", email)
   );
 
+  // Interactions are both emails from the user and to the user.
+  // Possibly could be 1 API call rather than 2? Need to dive deeper into
+  // FireStore API docs.
   const [fromSnapshot, toSnapshot] = await Promise.all([
     getDocs(fromQuery),
     getDocs(toQuery),
@@ -42,8 +47,7 @@ export const getInteractions = async (email: string) => {
     data.to.forEach((to: string) => {
       interactions.push({
         email: to,
-        // Timestamp is in seconds, but we want milliseconds
-        timestamp: Number(data.timestamp) * 1000,
+        date: toDate(data.timestamp),
       });
     });
     return interactions;
@@ -53,7 +57,7 @@ export const getInteractions = async (email: string) => {
     const data = d.data();
     return {
       email: data.from,
-      timestamp: Number(data.timestamp) * 1000,
+      date: toDate(data.timestamp),
     } as Interaction;
   });
 
@@ -66,14 +70,19 @@ export const getInteractions = async (email: string) => {
   return interactionMap;
 };
 
-const withinLastYear = (timestamp: number) => {
+const toDate = (timestamp: string) => {
+  // Timestamp from the DB is a string in seconds
+  return new Date(Number(timestamp) * 1000);
+};
+
+const withinLastYear = (date: Date) => {
   const now = new Date().getTime();
-  const lastYear = new Date(now - 365 * 24 * 60 * 60 * 1000).getTime();
-  return timestamp > lastYear;
+  const lastYear = new Date(now - 365 * 24 * 60 * 60 * 1000);
+  return date > lastYear;
 };
 
 const createInteractionMap = (interactions: Interaction[]) => {
-  return interactions.reduce((map, { email, timestamp }) => {
+  return interactions.reduce((map, { email, date }) => {
     if (!map[email]) {
       map[email] = {
         totalInteractionsCount: 0,
@@ -82,7 +91,7 @@ const createInteractionMap = (interactions: Interaction[]) => {
       };
     }
 
-    const lastYear = withinLastYear(timestamp);
+    const lastYear = withinLastYear(date);
 
     map[email].totalInteractionsCount++;
     map[email].withinYearInteractionsCount += lastYear ? 1 : 0;
