@@ -2,7 +2,7 @@
 
 ## Solution
 
-> https://ssearch.vercel.app/
+> https://s-connections.vercel.app/
 
 There were 3 categories of decisions made in order to implement the take-home assignment:
 
